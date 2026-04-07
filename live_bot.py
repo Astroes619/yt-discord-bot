@@ -68,6 +68,9 @@ import time
 import feedparser
 import requests
 from datetime import datetime, timezone
+from flask import Flask
+from threading import Thread
+import os
 
 WEBHOOK_URL = "https://discord.com/api/webhooks/1489646556264272066/F7txI4ttaJ7KaFkHNnWk5M1WRAjiltj8LuUkmy8yvMkAuPI_6G39W1MDW8JGnanQCjSl"
 
@@ -84,10 +87,20 @@ CHANNELS = [
 
 # 🔥 Tracks ONLY active live streams
 currently_live = set()
+app = Flask('')
 
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
 
 # 🔥 Track currently live videos
-currently_live = set()
 
 # 👇 ADD THIS FUNCTION RIGHT HERE
 def is_live_stream(entry):
@@ -148,6 +161,7 @@ def check_youtube():
 
             
 
+keep_alive()
 
 while True:
     check_youtube()
