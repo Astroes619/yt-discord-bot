@@ -24,15 +24,16 @@ CHANNELS = [
 currently_live = set()
 app = Flask('')
 
-@app.route('/')
+@app.route('/', methods=['GET', 'HEAD'])
 def home():
-    return "Bot is alive!"
+    return "Bot is alive!", 200
 
 def run():
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
+     app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)
 
 def keep_alive():
     t = Thread(target=run)
+    t.daemon = True
     t.start()
 
 # 🔥 Track currently live videos
