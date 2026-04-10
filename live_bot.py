@@ -29,7 +29,12 @@ def home():
     return "Bot is alive!", 200
 
 def run():
-     app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)
+    app.run(
+        host='0.0.0.0',
+        port=int(os.environ.get("PORT", 8080)),
+        debug=False,
+        use_reloader=False
+    )
 
 def keep_alive():
     t = Thread(target=run)
@@ -91,17 +96,30 @@ def check_youtube():
             print("Status:", response.status_code)
 
         # 🧹 CASE 2: STREAM ENDED → REMOVE
-        if not live and video_id in currently_live:
+        elif not live and video_id in currently_live:
             print(f"🛑 {channel['name']} stream ended")
             currently_live.remove(video_id)
 
             
 
+def bot_loop():
+    while True:
+        try:
+            check_youtube()
+        except Exception as e:
+            print("❌ Error:", e)
+        time.sleep(60)
+
+
+
 keep_alive()
 
+t = Thread(target=bot_loop)
+t.daemon = True
+t.start()
+
 while True:
-    check_youtube()
-    time.sleep(60)
+    time.sleep(1)
 
 #monna huttak dha mandha fucking work bn
 
