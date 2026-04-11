@@ -164,18 +164,19 @@ def keep_alive():
 # 🧠 LIVE DETECTION
 def is_live_stream(entry):
     title = entry.title.lower()
-    raw = str(entry).lower()
 
-    looks_live = (
-        " live " in f" {title} "
-        or "yt:livebroadcastcontent" in raw
-    )
+    # 🔥 Stronger keyword detection
+    keywords = ["live", "stream", "watching", "🔴"]
+
+    looks_live = any(word in title for word in keywords)
 
     try:
         published = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
         now = datetime.now(timezone.utc)
         time_diff = (now - published).total_seconds()
-        is_recent = time_diff < 3600  # 1 hour window
+
+        # ⏱ shorter window (important)
+        is_recent = time_diff < 7200  # 2 hours
     except:
         is_recent = False
 
