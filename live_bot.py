@@ -146,7 +146,6 @@ CHANNELS = [
 
 # 🔥 Track live + processed videos
 currently_live = set()
-seen_videos = set()
 
 # 🌐 Flask keep alive
 app = Flask('')
@@ -198,12 +197,6 @@ def check_youtube():
         # 🔥 Check last 3 entries (important)
         for entry in feed.entries[:3]:
             video_id = entry.id
-
-            if video_id in seen_videos:
-                continue
-
-            seen_videos.add(video_id)
-
             title = entry.title
             link = entry.link
 
@@ -212,8 +205,8 @@ def check_youtube():
             print(f"📌 Title: {title}")
             print(f"📡 Live detected: {live}")
 
-            # 🚀 SEND ONLY IF LIVE
-            if live:
+            # 🚀 CASE 1: NEW LIVE → SEND
+            if live and video_id not in currently_live:
                 currently_live.add(video_id)
 
                 message = f"<@&1406947307802591282> 🚨\n\n🔴 **{channel['name']} is now LIVE!**\n\n🎬 **{title}**\n{link}"
@@ -222,6 +215,10 @@ def check_youtube():
                 response = requests.post(WEBHOOK_URL, json={"content": message})
                 print("✅ Status:", response.status_code)
 
+            # 🧹 CASE 2: STREAM ENDED → REMOVE
+            elif not live and video_id in currently_live:
+                print(f"🛑 Stream ended for {channel['name']}")
+                currently_live.remove(video_id)
 # 🔁 Loop
 def bot_loop():
     while True:
